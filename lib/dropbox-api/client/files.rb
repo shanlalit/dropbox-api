@@ -6,15 +6,18 @@ module Dropbox
       module Files
 
         # Download only the EXIF part, only the first 64kb or 128kb of the image files
-        def download_headers(path, options = {})
-          root     = options.delete(:root) || Dropbox::API::Config.mode
-          path     = Dropbox::API::Util.escape(path)
-          url      = ['', "files", root, path].compact.join('/')
-          connection.get_raw(:content, url, {}, {
-            "Range" => "bytes=131072"
-          })
+        def download_headers(file, options = {})
+          # Check if file type is image
+          if file.mime_type.include?("image")
+            root     = options.delete(:root) || Dropbox::API::Config.mode
+            path     = Dropbox::API::Util.escape(file.path)
+            url      = ['', "files", root, path].compact.join('/')
+            connection.get_raw(:content, url, {}, {
+              "Range" => "bytes=131072"
+            })
+          end
         end
-        
+
         def download(path, options = {})
           root     = options.delete(:root) || Dropbox::API::Config.mode
           path     = Dropbox::API::Util.escape(path)
