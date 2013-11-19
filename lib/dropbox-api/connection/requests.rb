@@ -32,8 +32,13 @@ module Dropbox
               raise Dropbox::API::Error::Redirect.new("#{status} - Redirect Error")
             when 503
               parsed = MultiJson.decode(response.body)
-              header_parse = MultiJson.decode(response.headers)
-              error_message = "#{parsed["error"]}. Retry after: #{header_parse['Retry-After']}"
+              error_message = "#{parsed["error"]}."
+
+              if response.header.is_a?(String)
+                header_parse = MultiJson.decode(response.header)
+                error_message += " Retry after: #{header_parse['Retry-After']}"
+              end
+
               raise Dropbox::API::Error.new("503 - #{error_message}")
             when 507
               raise Dropbox::API::Error::StorageQuota.new("507 - Dropbox storage quota exceeded.")
